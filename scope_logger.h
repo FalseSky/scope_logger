@@ -20,6 +20,8 @@ class ScopeLogger final {
 
   void LogTimestamp() const;
   void LogMessage(std::string&& message) const;
+  template <typename VariableType>
+  void LogVariable(std::string&& variable_name, VariableType&& variable) const;
 
  private:
   using Duration = std::chrono::milliseconds;
@@ -38,17 +40,20 @@ class ScopeLogger final {
   const void* const object_id_;
   const std::string scope_id_;
 
-  static inline const auto kBeginMessage = "Begin";
-  static inline const auto kEndMessage = "End";
-  static inline const auto kTimestampMessage = "Timestamp";
+  static constexpr auto kBeginMessage = "Begin";
+  static constexpr auto kEndMessage = "End";
+  static constexpr auto kTimestampMessage = "Timestamp";
+  static constexpr auto kVariableMessage = "Variable";
 
-  static inline const auto kThreadTag = "Thread: ";
-  static inline const auto kTimestampTag = "Timestamp: ";
-  static inline const auto kObjectTag = "Object: ";
-  static inline const auto kScopeTag = "Scope: ";
-  static inline const auto kMessageTag = "Message: ";
-  static inline const auto kDurationTag = "Duration: ";
-  static inline const auto kTagSeparator = ". ";
+  static constexpr auto kThreadTag = "Thread: ";
+  static constexpr auto kTimestampTag = "Timestamp: ";
+  static constexpr auto kObjectTag = "Object: ";
+  static constexpr auto kScopeTag = "Scope: ";
+  static constexpr auto kMessageTag = "Message: ";
+  static constexpr auto kNameTag = "Name: ";
+  static constexpr auto kValueTag = "Value: ";
+  static constexpr auto kDurationTag = "Duration: ";
+  static constexpr auto kTagSeparator = ". ";
 };
 
 inline ScopeLogger::ScopeLogger(std::string&& scope_id)
@@ -79,6 +84,20 @@ inline void ScopeLogger::LogTimestamp() const {
 inline void ScopeLogger::LogMessage(std::string&& message) const {
   const auto current_timestamp{Now()};
   WriteMessage(current_timestamp, std::move(message));
+}
+
+template <typename VariableType>
+inline void ScopeLogger::LogVariable(std::string&& variable_name,
+                                     VariableType&& variable) const {
+  const auto current_timestamp{Now()};
+
+  std::stringstream string_stream;
+  WriteHeader(string_stream, current_timestamp);
+  string_stream << kTagSeparator << kMessageTag << kVariableMessage;
+  string_stream << kTagSeparator << kNameTag << variable_name;
+  string_stream << kTagSeparator << kValueTag << variable;
+  WriteFooter(string_stream, current_timestamp);
+  WriteText(string_stream.str());
 }
 
 inline ScopeLogger::Duration ScopeLogger::Now() {
