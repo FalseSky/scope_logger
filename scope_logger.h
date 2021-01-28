@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <stack>
+#include <string>
 #include <thread>
 
 /**********************************************************************************************************************/
@@ -204,7 +205,7 @@ inline FileScopeLogger::FileScopeLogger(const void* const object, std::string&& 
 #define FILE_LOG_FUNCTION \
   const FileScopeLogger INTERNAL_UNIQUE_NAME(scope_logger) { __func__ }
 #define FILE_LOG_SCOPE(scope_name) \
-  const ConsoleScopeLogger INTERNAL_UNIQUE_NAME(scope_logger) { scope_name }
+  const FileScopeLogger INTERNAL_UNIQUE_NAME(scope_logger) { scope_name }
 
 #define LOG_TIMESTAMP internal_scope_logger_stack.top()->LogTimestamp()
 #define LOG_MESSAGE(message) internal_scope_logger_stack.top()->LogMessage(#message)
